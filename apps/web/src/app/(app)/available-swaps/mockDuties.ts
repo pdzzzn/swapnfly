@@ -1,0 +1,57 @@
+// In: apps/web/src/app/available-swaps/mockDuties.ts
+import type { Duty } from "@/components/duty/DutyCard"; //
+
+export const mockDuties: Duty[] = [
+  {
+    id: "1",
+    type: "Flight",
+    date: "2024-11-15",
+    roleAvailable: "Captain",
+    time: "08:00 - 16:00",
+    startLocation: "JFK",
+    endLocation: "LAX",
+    flightNo: "SN001",
+    aircraftType: "B737",
+    notes: "Looking for a swap due to a personal event.",
+  },
+  {
+    id: "2",
+    type: "Standby",
+    date: "2024-11-16",
+    roleAvailable: "First Officer",
+    time: "10:00 - 18:00",
+    standbyLocation: "LHR",
+    notes: "Early standby, prefer a later one if possible.",
+  },
+  {
+    id: "3",
+    type: "Flight",
+    date: "2024-11-18",
+    roleAvailable: "Flight Attendant",
+    time: "14:00 - 22:00",
+    startLocation: "CDG",
+    endLocation: "DXB",
+    flightNo: "SN002",
+    aircraftType: "A380",
+  },
+  {
+    id: "4",
+    type: "Flight",
+    date: "2024-11-20",
+    roleAvailable: "Captain",
+    time: "06:00 - 12:00",
+    startLocation: "AMS",
+    endLocation: "FRA",
+    flightNo: "SN003",
+    aircraftType: "B777",
+    notes: "Short flight, easy duty.",
+  },
+  {
+    id: "5",
+    type: "Standby",
+    date: "2024-11-22",
+    roleAvailable: "Purser",
+    time: "00:00 - 08:00",
+    standbyLocation: "JFK",
+  },
+];

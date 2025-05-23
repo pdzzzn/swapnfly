@@ -1,16 +1,16 @@
 // apps/web/src/app/(app)/available-swaps/page.tsx
 "use client"; // For tRPC hooks and client-side interactions
 
-import DutyCard from "@/components/duty/DutyCard";
-import type { Duty } from "@/components/duty/DutyCard"; // Or from its original definition if separate
+import DutyCard from "@/components/duty/DutyCard"; //
+import type { Duty } from "@/components/duty/DutyCard"; //
 
-import DutyFilters from "@/components/duty/DutyFilters";
-import type { DutyFiltersState } from "@/components/duty/DutyFilters";
+import DutyFilters from "@/components/duty/DutyFilters"; //
+import type { DutyFiltersState } from "@/components/duty/DutyFilters"; //
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
-import { trpc } from "@/utils/trpc"; // Your tRPC client
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { ScrollArea } from "@/components/ui/scroll-area"; //
+import { useState, useEffect } from "react";
+// import { trpc } from "@/utils/trpc"; // Your tRPC client - Commented out for now
+import { Skeleton } from "@/components/ui/skeleton"; // For loading state //
 // Import Dialog components for swap confirmation flow
 import {
   Dialog,
@@ -19,34 +19,57 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
+} from "@/components/ui/dialog"; //
+import { Button } from "@/components/ui/button"; //
+import { mockDuties } from "./mockDuties"; // Import the mock data
 
 export default function AvailableSwapsPage() {
   const [filters, setFilters] = useState<DutyFiltersState>({});
   const [selectedDutyForSwap, setSelectedDutyForSwap] = useState<Duty | null>(null);
   const [isSwapConfirmDialogOpen, setIsSwapConfirmDialogOpen] = useState(false);
-
-  // Example: Fetching duties using tRPC
-  // Replace 'dutyRouter.getAvailableDuties' with your actual tRPC procedure
-  const { data: duties, isLoading, error } = trpc.dutyRouter.getAvailableDuties.useQuery(filters);
   
-  // Example: tRPC mutation for requesting a swap
-  const requestSwapMutation = trpc.dutyRouter.requestSwap.useMutation({
-    onSuccess: () => {
-      // Handle success (e.g., show notification, refetch duties)
-      console.log("Swap requested successfully!");
-      setIsSwapConfirmDialogOpen(false);
-      // Potentially refetch or update UI optimistically
-    },
-    onError: (err: any) => {
-      // Handle error
-      console.error("Failed to request swap:", err);
-    }
-  });
+  // Use mock data
+  const [duties, setDuties] = useState<Duty[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // Simulate initial loading
+
+  useEffect(() => {
+    // Simulate fetching data
+    setTimeout(() => {
+      let filteredDuties = mockDuties;
+      // Basic client-side filtering example (can be expanded)
+      if (filters.startLocation) {
+        filteredDuties = filteredDuties.filter(duty => 
+          duty.startLocation?.toLowerCase().includes(filters.startLocation?.toLowerCase() || "") ||
+          duty.standbyLocation?.toLowerCase().includes(filters.startLocation?.toLowerCase() || "")
+        );
+      }
+      if (filters.role && filters.role !== "ALL") {
+        filteredDuties = filteredDuties.filter(duty => duty.roleAvailable === filters.role);
+      }
+      // Add more filter logic here for startDate, endDate etc. as needed
+
+      setDuties(filteredDuties);
+      setIsLoading(false);
+    }, 500); // Simulate network delay
+  }, [filters]);
+
+
+  // Example: tRPC mutation for requesting a swap - kept for future integration
+  // const requestSwapMutation = trpc.dutyRouter.requestSwap.useMutation({
+  //   onSuccess: () => {
+  //     // Handle success (e.g., show notification, refetch duties)
+  //     console.log("Swap requested successfully!");
+  //     setIsSwapConfirmDialogOpen(false);
+  //     // Potentially refetch or update UI optimistically
+  //   },
+  //   onError: (err: any) => {
+  //     // Handle error
+  //     console.error("Failed to request swap:", err);
+  //   }
+  // });
 
   const handleFiltersChange = (newFilters: DutyFiltersState) => {
+    setIsLoading(true); // Set loading true while filters are applied
     setFilters(newFilters);
   };
 
@@ -61,15 +84,16 @@ export default function AvailableSwapsPage() {
   const confirmSwapRequest = () => {
     if (selectedDutyForSwap) {
       // requestSwapMutation.mutate({ dutyId: selectedDutyForSwap.id, /* other necessary params */ });
-      console.log("CONFIRMED SWAP FOR:", selectedDutyForSwap.id); // Replace with mutation
+      console.log("CONFIRMED SWAP FOR (mock):", selectedDutyForSwap.id); // Replace with mutation
       // For now, just close
        setIsSwapConfirmDialogOpen(false);
        setSelectedDutyForSwap(null);
+       // Potentially show a success toast here
     }
   };
 
-
-  if (error) return <div>Error loading duties: {error.message}</div>;
+  // No server error to handle with mock data initially
+  // if (error) return <div>Error loading duties: {error.message}</div>;
 
   return (
     <div className="flex flex-col h-full">
@@ -87,9 +111,9 @@ export default function AvailableSwapsPage() {
           <Skeleton className="h-40 w-full" />
         </div>
       ) : (
-        <ScrollArea className="flex-grow pr-1"> {/* Adjust height or use flex-grow */}
+        <ScrollArea className="flex-grow pr-1"> 
           {duties && duties.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"> {/* Responsive grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {duties.map((duty) => (
                 <DutyCard key={duty.id} duty={duty as Duty} onRequestDuty={() => handleRequestDuty(duty.id as string)} />
                 ))}
@@ -103,7 +127,6 @@ export default function AvailableSwapsPage() {
         </ScrollArea>
       )}
 
-      {/* Swap Confirmation Dialog */}
       <Dialog open={isSwapConfirmDialogOpen} onOpenChange={setIsSwapConfirmDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -114,7 +137,12 @@ export default function AvailableSwapsPage() {
                 <div className="mt-2 text-sm">
                   <p><strong>Type:</strong> {selectedDutyForSwap.type}</p>
                   <p><strong>Date:</strong> {selectedDutyForSwap.date}</p>
-                  {/* Add more details of selectedDutyForSwap here */}
+                  <p><strong>Time:</strong> {selectedDutyForSwap.time}</p>
+                  <p><strong>Role:</strong> {selectedDutyForSwap.roleAvailable}</p>
+                  {selectedDutyForSwap.flightNo && <p><strong>Flight:</strong> {selectedDutyForSwap.flightNo}</p>}
+                  {selectedDutyForSwap.startLocation && <p><strong>From:</strong> {selectedDutyForSwap.startLocation}</p>}
+                  {selectedDutyForSwap.endLocation && <p><strong>To:</strong> {selectedDutyForSwap.endLocation}</p>}
+                  {selectedDutyForSwap.standbyLocation && <p><strong>Standby At:</strong> {selectedDutyForSwap.standbyLocation}</p>}
                   <p className="mt-4">The crew member offering this duty will be notified.
                      Their contact details will be shared upon your confirmation.</p>
                 </div>
