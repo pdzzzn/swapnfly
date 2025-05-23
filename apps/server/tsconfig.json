@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"composite": true,         // <<< ADD THIS
+		"declaration": true,       // <<< ADD THIS (highly recommended)
+		"declarationMap": true,    // <<< ADD THIS (highly recommended)
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"verbatimModuleSyntax": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"baseUrl": "./",
+		"paths": {
+		  "@/*": ["./src/*"]
+		},
+		"outDir": "./dist",
+		"types": [
+        "node"
+    ],
+		"jsx": "react-jsx",
+		"jsxImportSource": "hono/jsx"
+	},
+	"tsc-alias": {
+		"resolveFullPaths": true
+	}
+}
